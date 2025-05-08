@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Room Dashboard</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    h2 { color: #333; }
+    .status { margin: 10px 0; }
+    button { margin: 5px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Smart Room Dashboard</h2>
+  <div class="status">
+    <p>🌡️ Temperature: <span id="temp">--</span> °C</p>
+    <p>💧 Humidity: <span id="humid">--</span> %</p>
+    <p>🔆 Light: <span id="light">--</span> lux</p>
+    <p>⚙️ System: <span id="system-status">--</span></p>
+  </div>
+
+  <h3>Control</h3>
+  <button onclick="sendControl('led', true)">LED ON</button>
+  <button onclick="sendControl('led', false)">LED OFF</button><br>
+  <button onclick="sendControl('buzzer', true)">Buzzer ON</button>
+  <button onclick="sendControl('buzzer', false)">Buzzer OFF</button><br>
+  <button onclick="sendControl('system_enabled', true)">Enable System</button>
+  <button onclick="sendControl('system_enabled', false)">Disable System</button>
+
+  <script>
+    const apiUrl = "https://YOUR_USERNAME.pythonanywhere.com"; // เปลี่ยนเป็นของคุณ
+
+    async function fetchStatus() {
+      const res = await fetch(apiUrl + "/status");
+      const data = await res.json();
+      document.getElementById("temp").textContent = data.sensor.temperature;
+      document.getElementById("humid").textContent = data.sensor.humidity;
+      document.getElementById("light").textContent = data.sensor.light;
+      document.getElementById("system-status").textContent = data.sensor.system_status ? "ON" : "OFF";
+    }
+
+    async function sendControl(device, value) {
+      await fetch(apiUrl + "/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [device]: value })
+      });
+      fetchStatus();
+    }
+
+    setInterval(fetchStatus, 3000);
+    fetchStatus();
+  </script>
+</body>
+</html>
