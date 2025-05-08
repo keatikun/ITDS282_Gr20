@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -18,7 +18,12 @@ device_control = {
     "system_enabled": True
 }
 
-# ESP32 ส่งข้อมูลมาที่นี่
+# หน้า Dashboard
+@app.route('/')
+def dashboard():
+    return render_template('dashboard.html')
+
+# ESP32 ส่งข้อมูลมา
 @app.route('/update', methods=['POST'])
 def update_data():
     data = request.get_json()
@@ -27,7 +32,7 @@ def update_data():
         return jsonify({"message": "Data updated"}), 200
     return jsonify({"message": "No data received"}), 400
 
-# Dashboard เรียกข้อมูลจาก ESP32
+# Dashboard ดึงข้อมูล
 @app.route('/status', methods=['GET'])
 def get_status():
     return jsonify({
@@ -35,7 +40,7 @@ def get_status():
         "control": device_control
     })
 
-# Dashboard ส่งคำสั่งควบคุมมา
+# Dashboard ควบคุมอุปกรณ์
 @app.route('/control', methods=['POST'])
 def control_devices():
     data = request.get_json()
