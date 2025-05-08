@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Room Dashboard</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .card { padding: 20px; border: 1px solid #ccc; margin-bottom: 20px; }
+        button { margin: 5px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h1>Smart Room Dashboard</h1>
+    <div class="card">
+        <h3>Sensor Data</h3>
+        <p>Temperature: <span id="temp">-</span> °C</p>
+        <p>Humidity: <span id="humidity">-</span> %</p>
+        <p>Light: <span id="light">-</span> lux</p>
+    </div>
+    <div class="card">
+        <h3>Device Control</h3>
+        <button onclick="toggle('led')">Toggle LED</button>
+        <button onclick="toggle('buzzer')">Toggle Buzzer</button>
+        <button onclick="toggle('system_enabled')">Toggle System</button>
+    </div>
+
+    <script>
+        async function loadStatus() {
+            const res = await fetch('/status');
+            const data = await res.json();
+            document.getElementById('temp').innerText = data.sensor.temperature;
+            document.getElementById('humidity').innerText = data.sensor.humidity;
+            document.getElementById('light').innerText = data.sensor.light;
+        }
+
+        async function toggle(device) {
+            const res = await fetch('/status');
+            const data = await res.json();
+            let control = data.control;
+            control[device] = !control[device];
+
+            await fetch('/control', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(control)
+            });
+
+            alert(`${device} is now ${control[device] ? 'ON' : 'OFF'}`);
+        }
+
+        setInterval(loadStatus, 2000);
+        loadStatus();
+    </script>
+</body>
+</html>
