@@ -49,5 +49,16 @@ def control_devices():
         return jsonify({"message": "Control updated"}), 200
     return jsonify({"message": "No data received"}), 400
 
+@app.route('/sync', methods=['POST'])
+def sync_all():
+    data = request.get_json()
+    if data:
+        sensor_data.update(data.get("sensor", {}))
+        device_control.update(data.get("control", {}))
+        return jsonify({"message": "Synced"}), 200
+    return jsonify({"message": "No data received"}), 400
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
