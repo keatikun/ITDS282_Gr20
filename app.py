@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -45,8 +46,12 @@ def get_status():
 def control_devices():
     data = request.get_json()
     if data:
-        device_control.update(data)
-        return jsonify({"message": "Control updated"}), 200
+        # Forward ไปยัง Node-RED แทน
+        try:
+            r = requests.post("http://192.168.1.54:1880/nodered/control", json=data)
+            return jsonify({"message": "Forwarded to Node-RED"}), r.status_code
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
     return jsonify({"message": "No data received"}), 400
 
 @app.route('/sync', methods=['POST'])
